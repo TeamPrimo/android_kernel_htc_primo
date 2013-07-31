@@ -195,7 +195,6 @@ SUBARCH := arm
 SUBARCH := arm
 export KBUILD_BUILDHOST := $(SUBARCH)
 ARCH		?= $(SUBARCH)
-CROSS_COMPILE	?=
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
@@ -374,9 +373,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -fno-delete-null-pointer-checks \
-		   -Wno-sizeof-pointer-memaccess \
-		   -fno-aggressive-loop-optimizations
+		   -fno-delete-null-pointer-checks
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
@@ -571,6 +568,18 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os -Wno-address
 else
 KBUILD_CFLAGS	+= -O2 -Wno-address
+endif
+
+# In GCC 4.8 and above some extra cflags are needed that arent in older
+# builds of the GCC. To handle this, do a check and add them to KBUILD_CFLAGS
+ifneq "$(CROSS_COMPILE)" ""
+GCCVERSION4_8 = $(shell expr `"$(CROSS_COMPILE)"gcc -dumpversion` \>= 4.8)
+else
+GCCVERSION4_8 = $(shell expr `gcc -dumpversion` \>= 4.8)
+endif
+
+ifeq "$(GCCVERSION4_8)" "1"
+KBUILD_CFLAGS	+= -Wno-sizeof-pointer-memaccess -fno-aggressive-loop-optimizations
 endif
 
 include $(srctree)/arch/$(SRCARCH)/Makefile
