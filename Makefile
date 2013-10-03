@@ -572,13 +572,13 @@ endif
 
 # In GCC 4.8 and above some extra cflags are needed that arent in older
 # builds of the GCC. To handle this, do a check and add them to KBUILD_CFLAGS
-ifneq "$(CROSS_COMPILE)" ""
+ifneq ($(CROSS_COMPILE),)
 GCCVERSION4_8 = $(shell expr `"$(CROSS_COMPILE)"gcc -dumpversion` \>= 4.8)
 else
 GCCVERSION4_8 = $(shell expr `gcc -dumpversion` \>= 4.8)
 endif
 
-ifeq "$(GCCVERSION4_8)" "1"
+ifeq ($(GCCVERSION4_8),1)
 KBUILD_CFLAGS	+= -Wno-sizeof-pointer-memaccess -fno-aggressive-loop-optimizations
 endif
 
